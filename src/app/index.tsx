@@ -6,19 +6,36 @@ import { SymbolView } from 'expo-symbols';
 
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
 import { validateLogin } from '@/features/auth/validation';
+import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string>();
 
   const handleLogin = async () => {
     const nextErrors = validateLogin({ email, password });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
+    setSubmitError(undefined);
+    if (!isSupabaseConfigured) {
+      setSubmitError('Supabase aún no está configurado en este entorno.');
+      return;
+    }
+
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 350));
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setIsSubmitting(false);
+
+    if (error) {
+      setSubmitError(error.message === 'Invalid login credentials'
+        ? 'Correo o contraseña incorrectos.'
+        : 'No fue posible iniciar sesión. Intenta nuevamente.');
+      return;
+    }
+
     router.replace('/home');
   };
 
@@ -53,6 +70,7 @@ export default function LoginScreen() {
             <Pressable accessibilityRole="button" disabled={isSubmitting} onPress={handleLogin} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, isSubmitting && styles.disabled]}>
               {isSubmitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryButtonText}>Ingresar</Text>}
             </Pressable>
+            {submitError && <Text accessibilityRole="alert" style={styles.submitError}>{submitError}</Text>}
             <Pressable accessibilityRole="button" onPress={() => {}} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Crear una cuenta</Text></Pressable>
           </View>
         </View>
@@ -73,6 +91,7 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md, marginTop: spacing.xl }, fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontSize: 14, fontWeight: typography.bold },
   inputContainer: { alignItems: 'center', borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, flexDirection: 'row', minHeight: 52, paddingHorizontal: spacing.md },
   inputError: { borderColor: colors.error }, input: { color: colors.darkBrown, flex: 1, fontSize: 15, marginLeft: spacing.sm, paddingVertical: 12 }, errorText: { color: colors.error, fontSize: 12 },
+  submitError: { color: colors.error, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   primaryButton: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm }, primaryButtonText: { color: colors.white, fontSize: 17, fontWeight: typography.bold },
   secondaryButton: { alignItems: 'center', borderColor: colors.coffee, borderRadius: radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 50 }, secondaryButtonText: { color: colors.coffee, fontSize: 16, fontWeight: typography.semiBold },
   pressed: { opacity: 0.82 }, disabled: { opacity: 0.65 },

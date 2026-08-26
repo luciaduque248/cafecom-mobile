@@ -2,6 +2,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
+import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 
 const actions = [
   { title: 'Protocolos', ios: 'book', android: 'menu_book', accent: '#FFF0E2' },
@@ -13,6 +15,11 @@ const actions = [
 ] as const;
 
 export default function HomeScreen() {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace('/');
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -20,6 +27,9 @@ export default function HomeScreen() {
           <View><Text style={styles.eyebrow}>BUENAS TARDES</Text><Text style={styles.title}>Menú</Text></View>
           <Pressable accessibilityLabel="Abrir perfil" accessibilityRole="button" style={styles.avatar}>
             <SymbolView name={{ ios: 'person.fill', android: 'person' }} size={25} tintColor={colors.coffee} />
+          </Pressable>
+          <Pressable accessibilityLabel="Cerrar sesión" accessibilityRole="button" onPress={handleLogout} style={styles.logoutButton}>
+            <SymbolView name={{ ios: 'rectangle.portrait.and.arrow.right', android: 'logout' }} size={22} tintColor={colors.coffee} />
           </Pressable>
         </View>
         <Text style={styles.subtitle}>¿Qué deseas hacer hoy?</Text>
@@ -49,6 +59,7 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.lg },
   eyebrow: { color: colors.orange, fontSize: 11, fontWeight: typography.bold, letterSpacing: 1.4 }, title: { color: colors.darkBrown, fontSize: 32, fontWeight: typography.extraBold, marginTop: 2 },
   avatar: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 },
+  logoutButton: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', marginLeft: spacing.sm, width: 48 },
   subtitle: { color: colors.darkBrown, fontSize: 15, fontWeight: typography.semiBold, marginBottom: spacing.lg, marginTop: spacing.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   card: { alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.lg, flexBasis: '48%', flexGrow: 1, gap: spacing.sm, justifyContent: 'center', minHeight: 154, padding: spacing.md, shadowColor: colors.darkBrown, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 },
