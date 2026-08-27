@@ -1,0 +1,45 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDgUC4vQMjkXvy3SW4391P_J1qfScd4UtA",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "cafecom-mobile.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "cafecom-mobile",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "cafecom-mobile.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "905444401204",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:905444401204:web:e0b50ebab316d38f83aa61",
+        "EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME": "colombia",
+        "EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET": "cafecom_unsigned"
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "environment": "development"
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "channel": "preview",
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "extends": "base",
+      "channel": "production",
+      "environment": "production",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

@@ -2,15 +2,18 @@
   "expo": {
     "name": "CaféCom",
     "slug": "cafecom-mobile",
+    "owner": "saraduques-team",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "cafecom",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.saraduque.cafecom"
     },
     "android": {
+      "package": "com.saraduque.cafecom",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -24,6 +27,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-dev-client",
       "expo-router",
       [
         "expo-splash-screen",
@@ -37,6 +41,17 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/99be3873-13e0-4e9e-9531-978dd8591d0f"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "99be3873-13e0-4e9e-9531-978dd8591d0f"
+      }
     }
   }
 }
