@@ -5,4 +5,11 @@ export const colors = {
 
 export const spacing = { xs: 6, sm: 10, md: 16, lg: 20, xl: 28, xxl: 36 } as const;
 export const radius = { md: 12, lg: 20 } as const;
-export const typography = { semiBold: '600', bold: '700', extraBold: '800' } as const;
+export const typography = {
+  family: 'Montserrat',
+  regular: '400',
+  medium: '500',
+  semiBold: '600',
+  bold: '700',
+  extraBold: '800',
+} as const;

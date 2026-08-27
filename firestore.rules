@@ -8,20 +8,22 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow create: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['displayName', 'email', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'avatarSymbol', 'createdAt'])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
         && request.resource.data.displayName.size() <= 80
         && request.resource.data.email == request.auth.token.email
+        && request.resource.data.avatarSymbol in ['☕', '🌱', '🍒', '🫘', '🌿', '⛰️']
         && request.resource.data.createdAt == request.time;
 
       allow read: if isOwner(userId);
 
       allow update: if isOwner(userId)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'avatarSymbol'])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
-        && request.resource.data.displayName.size() <= 80;
+        && request.resource.data.displayName.size() <= 80
+        && request.resource.data.avatarSymbol in ['☕', '🌱', '🍒', '🫘', '🌿', '⛰️'];
 
       allow delete: if false;
     }

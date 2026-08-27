@@ -28,9 +28,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#FDF9E8",
+          "image": "./assets/images/logo_cafecom.png",
+          "imageWidth": 178
         }
       ]
     ],

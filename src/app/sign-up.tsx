@@ -10,6 +10,8 @@ import { getAuthErrorMessage } from '@/features/auth/auth-errors';
 import { useAuth } from '@/features/auth/auth-context';
 import { validateSignUp, type SignUpErrors } from '@/features/auth/validation';
 import { auth, db, isFirebaseConfigured } from '@/lib/firebase';
+import { AvatarPicker } from '@/components/avatar-picker';
+import { getRandomAvatarSymbol } from '@/constants/avatar-symbols';
 
 export default function SignUpScreen() {
   const { isInitializing, user } = useAuth();
@@ -17,6 +19,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [avatarSymbol, setAvatarSymbol] = useState(getRandomAvatarSymbol);
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [submitError, setSubmitError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,6 +44,7 @@ export default function SignUpScreen() {
       await setDoc(doc(db, 'users', credential.user.uid), {
         displayName: name.trim(),
         email: credential.user.email,
+        avatarSymbol,
         createdAt: serverTimestamp(),
       });
       router.replace('/home');
@@ -97,6 +101,11 @@ export default function SignUpScreen() {
           <Text style={styles.title}>Crea tu cuenta</Text>
           <Text style={styles.description}>Guarda tus lotes y continúa tus procesos desde cualquier dispositivo.</Text>
           <View style={styles.form}>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Elige tu símbolo</Text>
+              <Text style={styles.avatarHint}>Podrás cambiarlo después desde el menú.</Text>
+              <AvatarPicker disabled={isSubmitting} onChange={setAvatarSymbol} value={avatarSymbol} />
+            </View>
             {field('Nombre', name, setName, errors.name)}
             {field('Correo electrónico', email, setEmail, errors.email)}
             {field('Contraseña', password, setPassword, errors.password, true)}
@@ -114,12 +123,13 @@ export default function SignUpScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.cream, flex: 1 }, keyboardView: { flex: 1 }, content: { flexGrow: 1, padding: spacing.xl },
-  back: { color: colors.coffee, fontSize: 16, fontWeight: typography.semiBold, marginBottom: spacing.xl },
-  title: { color: colors.darkBrown, fontSize: 30, fontWeight: typography.extraBold },
-  description: { color: colors.darkBrown, fontSize: 14, lineHeight: 21, marginTop: spacing.sm }, form: { gap: spacing.md, marginTop: spacing.xl },
-  fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontSize: 14, fontWeight: typography.bold },
-  input: { backgroundColor: colors.white, borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, color: colors.darkBrown, fontSize: 15, minHeight: 52, paddingHorizontal: spacing.md },
-  inputError: { borderColor: colors.error }, errorText: { color: colors.error, fontSize: 12 }, submitError: { color: colors.error, fontSize: 13, lineHeight: 18, textAlign: 'center' },
+  back: { color: colors.coffee, fontFamily: typography.family, fontSize: 16, fontWeight: typography.semiBold, marginBottom: spacing.xl },
+  title: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 30, fontWeight: typography.extraBold },
+  description: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, lineHeight: 21, marginTop: spacing.sm }, form: { gap: spacing.md, marginTop: spacing.xl },
+  fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, fontWeight: typography.bold },
+  avatarHint: { color: colors.muted, fontFamily: typography.family, fontSize: 12, marginBottom: spacing.xs },
+  input: { backgroundColor: colors.white, borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, color: colors.darkBrown, fontFamily: typography.family, fontSize: 15, minHeight: 52, paddingHorizontal: spacing.md },
+  inputError: { borderColor: colors.error }, errorText: { color: colors.error, fontFamily: typography.family, fontSize: 12 }, submitError: { color: colors.error, fontFamily: typography.family, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   button: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm },
-  buttonText: { color: colors.white, fontSize: 17, fontWeight: typography.bold }, pressed: { opacity: 0.82 }, disabled: { opacity: 0.65 },
+  buttonText: { color: colors.white, fontFamily: typography.family, fontSize: 17, fontWeight: typography.bold }, pressed: { opacity: 0.82 }, disabled: { opacity: 0.65 },
 });

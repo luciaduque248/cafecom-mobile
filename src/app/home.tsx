@@ -1,11 +1,15 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
 import { Redirect, router } from 'expo-router';
 import { signOut } from 'firebase/auth';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { AvatarPicker } from '@/components/avatar-picker';
+import { getAvatarSymbolForUser, isAvatarSymbol, type AvatarSymbol } from '@/constants/avatar-symbols';
 import { useAuth } from '@/features/auth/auth-context';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 
 const actions = [
   { title: 'Protocolos', ios: 'book', android: 'menu_book', accent: '#FFF0E2' },
@@ -18,10 +22,58 @@ const actions = [
 
 export default function HomeScreen() {
   const { isInitializing, user } = useAuth();
+  const userId = user?.uid;
+  const [avatarSymbol, setAvatarSymbol] = useState<AvatarSymbol>('☕');
+  const [avatarError, setAvatarError] = useState<string>();
+  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    let isActive = true;
+    const fallbackSymbol = getAvatarSymbolForUser(userId);
+    setAvatarSymbol(fallbackSymbol);
+
+    void getDoc(doc(db, 'users', userId))
+      .then((snapshot) => {
+        const storedSymbol = snapshot.data()?.avatarSymbol;
+        if (isActive && isAvatarSymbol(storedSymbol)) setAvatarSymbol(storedSymbol);
+      })
+      .catch(() => {
+        if (isActive) setAvatarError('No pudimos sincronizar el símbolo del perfil.');
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [userId]);
 
   const handleLogout = async () => {
     await signOut(auth);
     router.replace('/');
+  };
+
+  const handleAvatarChange = async (nextSymbol: AvatarSymbol) => {
+    if (!user || nextSymbol === avatarSymbol) {
+      setIsAvatarPickerOpen(false);
+      return;
+    }
+
+    const previousSymbol = avatarSymbol;
+    setAvatarError(undefined);
+    setAvatarSymbol(nextSymbol);
+    setIsSavingAvatar(true);
+
+    try {
+      await updateDoc(doc(db, 'users', user.uid), { avatarSymbol: nextSymbol });
+      setIsAvatarPickerOpen(false);
+    } catch {
+      setAvatarSymbol(previousSymbol);
+      setAvatarError('No se pudo guardar el símbolo. Inténtalo nuevamente.');
+    } finally {
+      setIsSavingAvatar(false);
+    }
   };
 
   if (isInitializing) {
@@ -42,8 +94,8 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View><Text style={styles.eyebrow}>{user?.displayName ? `HOLA, ${user.displayName.split(' ')[0].toUpperCase()}` : 'BIENVENIDA'}</Text><Text style={styles.title}>Menú</Text></View>
           <View style={styles.headerActions}>
-            <Pressable accessibilityLabel="Abrir perfil" accessibilityRole="button" style={styles.avatar}>
-              <SymbolView name={{ ios: 'person.fill', android: 'person' }} size={25} tintColor={colors.coffee} />
+            <Pressable accessibilityHint="Permite cambiar el símbolo del perfil" accessibilityLabel={`Avatar ${avatarSymbol}`} accessibilityRole="button" onPress={() => setIsAvatarPickerOpen(true)} style={styles.avatar}>
+              <Text style={styles.avatarSymbol}>{avatarSymbol}</Text>
             </Pressable>
             <Pressable accessibilityLabel="Cerrar sesión" accessibilityRole="button" onPress={handleLogout} style={styles.logoutButton}>
               <SymbolView name={{ ios: 'rectangle.portrait.and.arrow.right', android: 'logout' }} size={22} tintColor={colors.coffee} />
@@ -51,6 +103,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <Text style={styles.subtitle}>¿Qué deseas hacer hoy?</Text>
+        {avatarError ? <Text accessibilityRole="alert" style={styles.avatarError}>{avatarError}</Text> : null}
         <View style={styles.grid}>
           {actions.map((action) => (
             <Pressable accessibilityHint={`Abre ${action.title}`} accessibilityRole="button" key={action.title} style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
@@ -68,6 +121,19 @@ export default function HomeScreen() {
           <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle' }} size={22} tintColor={colors.success} />
         </View>
       </ScrollView>
+      <Modal animationType="fade" onRequestClose={() => setIsAvatarPickerOpen(false)} transparent visible={isAvatarPickerOpen}>
+        <View style={styles.modalBackdrop}>
+          <View accessibilityViewIsModal style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Elige tu símbolo</Text>
+            <Text style={styles.modalDescription}>Este símbolo te identificará dentro de CaféCom.</Text>
+            <AvatarPicker disabled={isSavingAvatar} onChange={handleAvatarChange} value={avatarSymbol} />
+            {isSavingAvatar ? <ActivityIndicator color={colors.coffee} style={styles.avatarLoader} /> : null}
+            <Pressable accessibilityRole="button" disabled={isSavingAvatar} onPress={() => setIsAvatarPickerOpen(false)} style={styles.modalClose}>
+              <Text style={styles.modalCloseText}>Cancelar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -76,13 +142,22 @@ const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.cream, flex: 1 }, loading: { alignItems: 'center', justifyContent: 'center' }, content: { paddingBottom: spacing.xxl, paddingHorizontal: spacing.lg },
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.lg },
   headerActions: { flexDirection: 'row', gap: spacing.sm },
-  eyebrow: { color: colors.orange, fontSize: 11, fontWeight: typography.bold, letterSpacing: 1.4 }, title: { color: colors.darkBrown, fontSize: 32, fontWeight: typography.extraBold, marginTop: 2 },
+  eyebrow: { color: colors.orange, fontFamily: typography.family, fontSize: 11, fontWeight: typography.bold, letterSpacing: 1.4 }, title: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 32, fontWeight: typography.extraBold, marginTop: 2 },
   avatar: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 },
+  avatarSymbol: { fontFamily: typography.family, fontSize: 24 },
   logoutButton: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 },
-  subtitle: { color: colors.darkBrown, fontSize: 15, fontWeight: typography.semiBold, marginBottom: spacing.lg, marginTop: spacing.xl },
+  subtitle: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 15, fontWeight: typography.semiBold, marginBottom: spacing.lg, marginTop: spacing.xl },
+  avatarError: { color: colors.error, fontFamily: typography.family, fontSize: 12, marginBottom: spacing.md, marginTop: -spacing.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   card: { alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.lg, flexBasis: '48%', flexGrow: 1, gap: spacing.sm, justifyContent: 'center', minHeight: 154, padding: spacing.md, shadowColor: colors.darkBrown, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 },
-  iconContainer: { alignItems: 'center', borderRadius: 25, height: 50, justifyContent: 'center', width: 50 }, cardTitle: { color: colors.darkBrown, fontSize: 14, fontWeight: typography.bold, minHeight: 36, textAlign: 'center' }, pressed: { opacity: 0.76, transform: [{ scale: 0.98 }] },
+  iconContainer: { alignItems: 'center', borderRadius: 25, height: 50, justifyContent: 'center', width: 50 }, cardTitle: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, fontWeight: typography.bold, minHeight: 36, textAlign: 'center' }, pressed: { opacity: 0.76, transform: [{ scale: 0.98 }] },
   syncCard: { alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.lg, flexDirection: 'row', marginTop: spacing.lg, padding: spacing.md }, syncIcon: { alignItems: 'center', backgroundColor: '#EAF5E8', borderRadius: 20, height: 40, justifyContent: 'center', width: 40 }, syncCopy: { flex: 1, marginLeft: spacing.md },
-  syncLabel: { color: colors.darkBrown, fontSize: 13, fontWeight: typography.bold }, syncTime: { color: colors.muted, fontSize: 12, marginTop: 3 },
+  syncLabel: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 13, fontWeight: typography.bold }, syncTime: { color: colors.muted, fontFamily: typography.family, fontSize: 12, marginTop: 3 },
+  modalBackdrop: { alignItems: 'center', backgroundColor: 'rgba(58, 31, 13, 0.42)', flex: 1, justifyContent: 'center', padding: spacing.xl },
+  modalCard: { backgroundColor: colors.white, borderRadius: radius.lg, gap: spacing.md, maxWidth: 360, padding: spacing.xl, width: '100%' },
+  modalTitle: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 22, fontWeight: typography.extraBold, textAlign: 'center' },
+  modalDescription: { color: colors.muted, fontFamily: typography.family, fontSize: 13, lineHeight: 19, textAlign: 'center' },
+  avatarLoader: { marginTop: spacing.xs },
+  modalClose: { alignItems: 'center', borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 48 },
+  modalCloseText: { color: colors.coffee, fontFamily: typography.family, fontSize: 15, fontWeight: typography.semiBold },
 });

@@ -10,6 +10,7 @@ import { getAuthErrorMessage } from '@/features/auth/auth-errors';
 import { useAuth } from '@/features/auth/auth-context';
 import { validateLogin } from '@/features/auth/validation';
 import { auth } from '@/lib/firebase';
+import { BrandLogo } from '@/components/brand-logo';
 
 export default function LoginScreen() {
   const { isConfigured, isInitializing, user } = useAuth();
@@ -49,8 +50,7 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardView}>
         <View style={styles.brandArea}>
-          <View style={styles.logoCircle} accessibilityElementsHidden><Text style={styles.logoMark}>☕</Text></View>
-          <Text style={styles.brand}>CaféCom</Text>
+          <BrandLogo />
           <Text style={styles.tagline}>Tu guía práctica para mejorar la calidad del café</Text>
         </View>
         <View style={styles.sheet}>
@@ -88,17 +88,15 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.cream }, keyboardView: { flex: 1, justifyContent: 'flex-end' },
   brandArea: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, minHeight: 255 },
-  logoCircle: { width: 108, height: 108, borderRadius: 54, backgroundColor: colors.white, alignItems: 'center', justifyContent: 'center', shadowColor: colors.darkBrown, shadowOpacity: 0.08, shadowRadius: 16, elevation: 3 },
-  logoMark: { fontSize: 54 }, brand: { marginTop: spacing.md, color: colors.darkBrown, fontSize: 26, fontWeight: typography.extraBold },
-  tagline: { color: colors.darkBrown, fontSize: 13, lineHeight: 19, maxWidth: 300, marginTop: spacing.xs, textAlign: 'center' },
+  tagline: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 13, lineHeight: 19, maxWidth: 300, marginTop: spacing.xs, textAlign: 'center' },
   sheet: { backgroundColor: colors.white, borderTopLeftRadius: 42, borderTopRightRadius: 42, paddingHorizontal: spacing.xl, paddingTop: spacing.xxl, paddingBottom: spacing.xl },
-  title: { color: colors.darkBrown, fontSize: 27, fontWeight: typography.extraBold, textAlign: 'center' },
-  description: { color: colors.darkBrown, fontSize: 13, lineHeight: 19, marginTop: spacing.sm, textAlign: 'center' },
-  form: { gap: spacing.md, marginTop: spacing.xl }, fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontSize: 14, fontWeight: typography.bold },
+  title: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 27, fontWeight: typography.extraBold, textAlign: 'center' },
+  description: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 13, lineHeight: 19, marginTop: spacing.sm, textAlign: 'center' },
+  form: { gap: spacing.md, marginTop: spacing.xl }, fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, fontWeight: typography.bold },
   inputContainer: { alignItems: 'center', borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, flexDirection: 'row', minHeight: 52, paddingHorizontal: spacing.md },
-  inputError: { borderColor: colors.error }, input: { color: colors.darkBrown, flex: 1, fontSize: 15, marginLeft: spacing.sm, paddingVertical: 12 }, errorText: { color: colors.error, fontSize: 12 },
-  submitError: { color: colors.error, fontSize: 13, lineHeight: 18, textAlign: 'center' },
-  primaryButton: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm }, primaryButtonText: { color: colors.white, fontSize: 17, fontWeight: typography.bold },
-  secondaryButton: { alignItems: 'center', borderColor: colors.coffee, borderRadius: radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 50 }, secondaryButtonText: { color: colors.coffee, fontSize: 16, fontWeight: typography.semiBold },
+  inputError: { borderColor: colors.error }, input: { color: colors.darkBrown, flex: 1, fontFamily: typography.family, fontSize: 15, marginLeft: spacing.sm, paddingVertical: 12 }, errorText: { color: colors.error, fontFamily: typography.family, fontSize: 12 },
+  submitError: { color: colors.error, fontFamily: typography.family, fontSize: 13, lineHeight: 18, textAlign: 'center' },
+  primaryButton: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm }, primaryButtonText: { color: colors.white, fontFamily: typography.family, fontSize: 17, fontWeight: typography.bold },
+  secondaryButton: { alignItems: 'center', borderColor: colors.coffee, borderRadius: radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 50 }, secondaryButtonText: { color: colors.coffee, fontFamily: typography.family, fontSize: 16, fontWeight: typography.semiBold },
   pressed: { opacity: 0.82 }, disabled: { opacity: 0.65 },
 });
