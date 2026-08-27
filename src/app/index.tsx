@@ -3,10 +3,12 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleShee
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
+import { FirebaseError } from 'firebase/app';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
 import { validateLogin } from '@/features/auth/validation';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { auth, isFirebaseConfigured } from '@/lib/firebase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -19,24 +21,34 @@ export default function LoginScreen() {
     const nextErrors = validateLogin({ email, password });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
+
     setSubmitError(undefined);
-    if (!isSupabaseConfigured) {
-      setSubmitError('Supabase aún no está configurado en este entorno.');
+    if (!isFirebaseConfigured) {
+      setSubmitError('Firebase aún no está configurado en este entorno.');
       return;
     }
 
     setIsSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setIsSubmitting(false);
 
-    if (error) {
-      setSubmitError(error.message === 'Invalid login credentials'
-        ? 'Correo o contraseña incorrectos.'
-        : 'No fue posible iniciar sesión. Intenta nuevamente.');
-      return;
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace('/home');
+    } catch (error) {
+      if (error instanceof FirebaseError && [
+        'auth/invalid-credential',
+        'auth/invalid-email',
+        'auth/user-not-found',
+        'auth/wrong-password',
+      ].includes(error.code)) {
+        setSubmitError('Correo o contraseña incorrectos.');
+      } else if (error instanceof FirebaseError && error.code === 'auth/too-many-requests') {
+        setSubmitError('Demasiados intentos. Espera un momento e intenta nuevamente.');
+      } else {
+        setSubmitError('No fue posible iniciar sesión. Intenta nuevamente.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    router.replace('/home');
   };
 
   return (
