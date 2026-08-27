@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
-import { FirebaseError } from 'firebase/app';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
+import { getAuthErrorMessage } from '@/features/auth/auth-errors';
+import { useAuth } from '@/features/auth/auth-context';
 import { validateLogin } from '@/features/auth/validation';
-import { auth, isFirebaseConfigured } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 
 export default function LoginScreen() {
+  const { isConfigured, isInitializing, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -21,35 +23,27 @@ export default function LoginScreen() {
     const nextErrors = validateLogin({ email, password });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
-
     setSubmitError(undefined);
-    if (!isFirebaseConfigured) {
+    if (!isConfigured) {
       setSubmitError('Firebase aún no está configurado en este entorno.');
       return;
     }
 
     setIsSubmitting(true);
-
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace('/home');
     } catch (error) {
-      if (error instanceof FirebaseError && [
-        'auth/invalid-credential',
-        'auth/invalid-email',
-        'auth/user-not-found',
-        'auth/wrong-password',
-      ].includes(error.code)) {
-        setSubmitError('Correo o contraseña incorrectos.');
-      } else if (error instanceof FirebaseError && error.code === 'auth/too-many-requests') {
-        setSubmitError('Demasiados intentos. Espera un momento e intenta nuevamente.');
-      } else {
-        setSubmitError('No fue posible iniciar sesión. Intenta nuevamente.');
-      }
+      const code = typeof error === 'object' && error && 'code' in error ? String(error.code) : undefined;
+      setSubmitError(getAuthErrorMessage(code));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (!isInitializing && user) {
+    return <Redirect href="/home" />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -79,11 +73,11 @@ export default function LoginScreen() {
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
-            <Pressable accessibilityRole="button" disabled={isSubmitting} onPress={handleLogin} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, isSubmitting && styles.disabled]}>
+            <Pressable accessibilityRole="button" disabled={isSubmitting || isInitializing} onPress={handleLogin} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed, (isSubmitting || isInitializing) && styles.disabled]}>
               {isSubmitting ? <ActivityIndicator color={colors.white} /> : <Text style={styles.primaryButtonText}>Ingresar</Text>}
             </Pressable>
             {submitError && <Text accessibilityRole="alert" style={styles.submitError}>{submitError}</Text>}
-            <Pressable accessibilityRole="button" onPress={() => {}} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Crear una cuenta</Text></Pressable>
+            <Pressable accessibilityRole="button" onPress={() => router.push('/sign-up')} style={styles.secondaryButton}><Text style={styles.secondaryButtonText}>Crear una cuenta</Text></Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>

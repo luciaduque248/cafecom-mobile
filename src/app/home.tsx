@@ -1,9 +1,11 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
-import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
+import { Redirect, router } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '@/features/auth/auth-context';
+import { auth } from '@/lib/firebase';
 
 const actions = [
   { title: 'Protocolos', ios: 'book', android: 'menu_book', accent: '#FFF0E2' },
@@ -15,22 +17,38 @@ const actions = [
 ] as const;
 
 export default function HomeScreen() {
+  const { isInitializing, user } = useAuth();
+
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut(auth);
     router.replace('/');
   };
+
+  if (isInitializing) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.loading]}>
+        <ActivityIndicator color={colors.coffee} size="large" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!isInitializing && !user) {
+    return <Redirect href="/" />;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View><Text style={styles.eyebrow}>BUENAS TARDES</Text><Text style={styles.title}>Menú</Text></View>
-          <Pressable accessibilityLabel="Abrir perfil" accessibilityRole="button" style={styles.avatar}>
-            <SymbolView name={{ ios: 'person.fill', android: 'person' }} size={25} tintColor={colors.coffee} />
-          </Pressable>
-          <Pressable accessibilityLabel="Cerrar sesión" accessibilityRole="button" onPress={handleLogout} style={styles.logoutButton}>
-            <SymbolView name={{ ios: 'rectangle.portrait.and.arrow.right', android: 'logout' }} size={22} tintColor={colors.coffee} />
-          </Pressable>
+          <View><Text style={styles.eyebrow}>{user?.displayName ? `HOLA, ${user.displayName.split(' ')[0].toUpperCase()}` : 'BIENVENIDA'}</Text><Text style={styles.title}>Menú</Text></View>
+          <View style={styles.headerActions}>
+            <Pressable accessibilityLabel="Abrir perfil" accessibilityRole="button" style={styles.avatar}>
+              <SymbolView name={{ ios: 'person.fill', android: 'person' }} size={25} tintColor={colors.coffee} />
+            </Pressable>
+            <Pressable accessibilityLabel="Cerrar sesión" accessibilityRole="button" onPress={handleLogout} style={styles.logoutButton}>
+              <SymbolView name={{ ios: 'rectangle.portrait.and.arrow.right', android: 'logout' }} size={22} tintColor={colors.coffee} />
+            </Pressable>
+          </View>
         </View>
         <Text style={styles.subtitle}>¿Qué deseas hacer hoy?</Text>
         <View style={styles.grid}>
@@ -45,8 +63,8 @@ export default function HomeScreen() {
           ))}
         </View>
         <View style={styles.syncCard}>
-          <View style={styles.syncIcon}><SymbolView name={{ ios: 'wifi', android: 'wifi' }} size={20} tintColor={colors.success} /></View>
-          <View style={styles.syncCopy}><Text style={styles.syncLabel}>Última sincronización</Text><Text style={styles.syncTime}>Hace 5 min</Text></View>
+          <View style={styles.syncIcon}><SymbolView name={{ ios: 'lock.shield', android: 'verified_user' }} size={20} tintColor={colors.success} /></View>
+          <View style={styles.syncCopy}><Text style={styles.syncLabel}>Sesión protegida</Text><Text style={styles.syncTime}>Firebase Authentication</Text></View>
           <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check_circle' }} size={22} tintColor={colors.success} />
         </View>
       </ScrollView>
@@ -55,11 +73,12 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.cream, flex: 1 }, content: { paddingBottom: spacing.xxl, paddingHorizontal: spacing.lg },
+  safeArea: { backgroundColor: colors.cream, flex: 1 }, loading: { alignItems: 'center', justifyContent: 'center' }, content: { paddingBottom: spacing.xxl, paddingHorizontal: spacing.lg },
   header: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between', paddingTop: spacing.lg },
+  headerActions: { flexDirection: 'row', gap: spacing.sm },
   eyebrow: { color: colors.orange, fontSize: 11, fontWeight: typography.bold, letterSpacing: 1.4 }, title: { color: colors.darkBrown, fontSize: 32, fontWeight: typography.extraBold, marginTop: 2 },
   avatar: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 },
-  logoutButton: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', marginLeft: spacing.sm, width: 48 },
+  logoutButton: { alignItems: 'center', backgroundColor: colors.white, borderRadius: 24, height: 48, justifyContent: 'center', width: 48 },
   subtitle: { color: colors.darkBrown, fontSize: 15, fontWeight: typography.semiBold, marginBottom: spacing.lg, marginTop: spacing.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   card: { alignItems: 'center', backgroundColor: colors.white, borderRadius: radius.lg, flexBasis: '48%', flexGrow: 1, gap: spacing.sm, justifyContent: 'center', minHeight: 154, padding: spacing.md, shadowColor: colors.darkBrown, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 2 },

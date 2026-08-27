@@ -1,14 +1,14 @@
 # CaféCom Mobile
 
-Aplicación móvil multiplataforma para acompañar a caficultores con protocolos, gestión de lotes y comunidad.
+Aplicación móvil multiplataforma para acompañar a caficultores con protocolos, gestión de lotes y comunidad. La primera entrega implementa inicio de sesión y Home a partir del prototipo de Figma.
 
 ## Stack
 
 - Expo SDK 57 + React Native + TypeScript
 - Expo Router
-- Firebase Authentication
-- Cloud Firestore
+- Firebase Authentication + Cloud Firestore
 - Cloudinary para imágenes
+- Diseño accesible y adaptable para Android e iOS
 
 ## Ejecutar
 
@@ -17,34 +17,30 @@ npm install
 npm run android
 ```
 
-## Configuración local
-
-1. Copia `.env.example` como `.env`.
-2. Crea un proyecto en Firebase y registra una app Web para obtener el objeto de configuración.
-3. Completa las variables `EXPO_PUBLIC_FIREBASE_*` en `.env`.
-4. En Firebase Authentication habilita el proveedor Email/Password.
-5. Crea la base de datos Cloud Firestore.
-6. Publica las reglas de `firestore.rules` desde Firebase Console o Firebase CLI.
-7. En Cloudinary crea un unsigned upload preset y completa `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` y `EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET`.
-8. Reinicia Expo después de cambiar variables de entorno.
-
-## Seguridad
-
-Las variables `EXPO_PUBLIC_*` forman parte del bundle cliente y no deben contener secretos. No agregues `CLOUDINARY_API_SECRET`, credenciales administrativas de Firebase ni service-account keys al proyecto móvil.
-
-Las reglas iniciales de Firestore permiten a cada usuario autenticado leer y actualizar únicamente su documento `users/{uid}` y deniegan el resto por defecto. A medida que se creen lotes, protocolos y comunidad, deben añadirse reglas explícitas para cada colección.
-
-Cloudinary se usa mediante un unsigned upload preset. El `api_secret` de Cloudinary nunca debe estar dentro de la aplicación.
-
-## Servicios
-
-- `src/lib/firebase.ts`: inicialización de Firebase, Authentication y Firestore.
-- `src/lib/cloudinary.ts`: subida de imágenes a Cloudinary.
-
 ## Verificación
 
 ```bash
-npm run lint
-npm run typecheck
 npm test
+npm run typecheck
+npx expo export --platform android
 ```
+
+La validación, registro, inicio/cierre de sesión y navegación protegida están implementados. Firebase gestiona las credenciales y la sesión se persiste mediante AsyncStorage.
+
+## Configuración de Firebase
+
+1. Copia `.env.example` como `.env` y completa la configuración pública de la app web de Firebase.
+2. Activa Email/Password en Firebase Authentication.
+3. Crea Firestore en modo producción.
+4. Publica las reglas con `npx firebase-tools deploy --only firestore:rules`.
+5. Reinicia Expo después de cambiar variables de entorno.
+
+Las variables `EXPO_PUBLIC_*` se incorporan al bundle móvil: solo deben contener configuración pública. Nunca agregues credenciales administrativas ni claves de cuentas de servicio.
+
+## Configuración de Cloudinary
+
+Usa un upload preset **unsigned** restringido por formato, tamaño y carpeta, y completa las dos variables públicas de Cloudinary. La aplicación nunca debe incluir `API_SECRET`. Para producción se migrarán las cargas a firmas generadas por un backend.
+
+## Seguridad de datos
+
+Las reglas incluidas permiten que cada usuario autenticado cree y lea únicamente `users/{uid}`. Solo puede modificar su nombre; el correo y la fecha de creación permanecen inmutables. Cualquier otra colección queda bloqueada hasta que se diseñen reglas explícitas.

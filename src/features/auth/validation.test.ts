@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { validateLogin } from './validation.ts';
+import { validateLogin, validateSignUp } from './validation.ts';
 
 test('rechaza campos vacíos', () => {
   assert.deepEqual(validateLogin({ email: '', password: '' }), {
@@ -19,4 +19,13 @@ test('rechaza correo inválido y contraseña corta', () => {
 
 test('acepta credenciales con formato válido', () => {
   assert.deepEqual(validateLogin({ email: ' sara@example.com ', password: '123456' }), {});
+});
+
+test('valida el registro y la confirmación de contraseña', () => {
+  assert.deepEqual(validateSignUp({
+    name: '', email: 'sara@example.com', password: '123456', confirmPassword: '654321',
+  }), {
+    name: 'Ingresa tu nombre.',
+    confirmPassword: 'Las contraseñas no coinciden.',
+  });
 });
