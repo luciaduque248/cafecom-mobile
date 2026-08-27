@@ -35,12 +35,12 @@ npm run android:apk:windows
 La APK queda en:
 
 ```text
-android/app/build/outputs/apk/debug/app-debug.apk
+android/app/build/outputs/apk/release/app-release.apk
 ```
 
 También se genera sin Android Studio al publicar cambios Android en `main`, o
 manualmente desde **GitHub → Actions → Build Android APK → Run workflow**. Al
-terminar, la APK aparece como artefacto `cafecom-android-debug` durante 14 días.
+terminar, la APK aparece como artefacto `cafecom-android-release` durante 14 días.
 
 Para compilar, instalar y abrir la aplicación nativa en el emulador conectado:
 

@@ -41,7 +41,7 @@
     "android": "expo run:android",
     "android:native": "expo run:android",
     "android:prebuild": "expo prebuild --platform android",
-    "android:apk:windows": "cd android && gradlew.bat assembleDebug",
+    "android:apk:windows": "cd android && gradlew.bat assembleRelease",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
