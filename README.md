@@ -17,6 +17,40 @@ npm install
 npm run android
 ```
 
+## Android nativo y Android Studio
+
+La carpeta `android/` forma parte del repositorio y contiene un proyecto Gradle
+completo. En Android Studio selecciona **Open** y abre directamente la carpeta
+`android`; el módulo ejecutable es `app` y el identificador es
+`com.saraduque.cafecom`.
+
+En Windows puedes regenerar la configuración nativa después de cambiar
+`app.json` y compilar una APK de depuración con:
+
+```powershell
+npm run android:prebuild
+npm run android:apk:windows
+```
+
+La APK queda en:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+También se genera sin Android Studio al publicar cambios Android en `main`, o
+manualmente desde **GitHub → Actions → Build Android APK → Run workflow**. Al
+terminar, la APK aparece como artefacto `cafecom-android-debug` durante 14 días.
+
+Para compilar, instalar y abrir la aplicación nativa en el emulador conectado:
+
+```powershell
+npm run android:native
+```
+
+El splash nativo se genera desde `assets/images/logo_cafecom.png` mediante la
+configuración de `expo-splash-screen` en `app.json`.
+
 ## Verificación
 
 ```bash
