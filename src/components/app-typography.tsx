@@ -7,11 +7,15 @@ export function AppText({ style, ...props }: TextProps) {
 }
 
 export function AppTextInput({ style, ...props }: TextInputProps) {
-  return <NativeTextInput {...props} style={[styles.montserrat, style]} />;
+  return <NativeTextInput {...props} style={[styles.input, style]} />;
 }
 
 const styles = StyleSheet.create({
   montserrat: {
     fontFamily: typography.family,
+  },
+  input: {
+    fontFamily: typography.family,
+    fontWeight: typography.regular,
   },
 });
