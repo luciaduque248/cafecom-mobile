@@ -1,5 +1,6 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppText as Text } from '@/components/app-typography';
 import { avatarSymbols, type AvatarSymbol } from '@/constants/avatar-symbols';
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
 
