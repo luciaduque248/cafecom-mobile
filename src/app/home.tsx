@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SymbolView } from 'expo-symbols';
 import { colors, radius, spacing, typography } from '@/constants/design-tokens';
 import { Redirect, router } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { AppText as Text } from '@/components/app-typography';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { getAvatarSymbolForUser, isAvatarSymbol, type AvatarSymbol } from '@/constants/avatar-symbols';
 import { useAuth } from '@/features/auth/auth-context';
