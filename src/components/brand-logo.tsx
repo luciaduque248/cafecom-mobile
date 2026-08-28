@@ -1,11 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
-import { Image } from 'expo-image';
+import { SvgXml } from 'react-native-svg';
 
 import cafecomSvg from '../../assets/images/cafecom.svg';
 import { colors } from '@/constants/design-tokens';
-
-const logoDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(cafecomSvg)}`;
 
 type BrandLogoProps = {
   height?: number;
@@ -13,15 +11,7 @@ type BrandLogoProps = {
 };
 
 export function BrandLogo({ height = 144, width = 134 }: BrandLogoProps) {
-  return (
-    <Image
-      accessibilityLabel="CaféCom"
-      cachePolicy="memory"
-      contentFit="contain"
-      source={{ uri: logoDataUri }}
-      style={{ height, width }}
-    />
-  );
+  return <SvgXml xml={cafecomSvg} width={width} height={height} />;
 }
 
 type AnimatedBrandSplashProps = {
