@@ -78,11 +78,13 @@ export default function SignUpScreen() {
         accessibilityLabel={label}
         autoCapitalize={label === 'Nombre' ? 'words' : 'none'}
         autoComplete={label === 'Correo electrónico' ? 'email' : secureTextEntry ? 'new-password' : 'name'}
+        cursorColor={colors.coffee}
         inputMode={label === 'Correo electrónico' ? 'email' : 'text'}
         onChangeText={onChangeText}
         placeholder={label}
         placeholderTextColor={colors.muted}
         secureTextEntry={secureTextEntry}
+        selectionColor={colors.coffee}
         style={[styles.input, error && styles.inputError]}
         value={value}
       />
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
   description: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, lineHeight: 21, marginTop: spacing.sm }, form: { gap: spacing.md, marginTop: spacing.xl },
   fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, fontWeight: typography.bold },
   avatarHint: { color: colors.muted, fontFamily: typography.family, fontSize: 12, marginBottom: spacing.xs },
-  input: { backgroundColor: colors.white, borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, color: colors.darkBrown, fontFamily: typography.family, fontSize: 15, minHeight: 52, paddingHorizontal: spacing.md },
+  input: { backgroundColor: colors.white, borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, color: colors.coffee, fontFamily: typography.family, fontSize: 15, fontWeight: typography.regular, minHeight: 52, paddingHorizontal: spacing.md },
   inputError: { borderColor: colors.error }, errorText: { color: colors.error, fontFamily: typography.family, fontSize: 12 }, submitError: { color: colors.error, fontFamily: typography.family, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   button: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm },
   buttonText: { color: colors.white, fontFamily: typography.family, fontSize: 17, fontWeight: typography.bold }, pressed: { opacity: 0.82 }, disabled: { opacity: 0.65 },
