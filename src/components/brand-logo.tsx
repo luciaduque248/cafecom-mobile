@@ -1,10 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Asset } from 'expo-asset';
 import { Image } from 'expo-image';
 
 import { colors } from '@/constants/design-tokens';
 
-const logoSource = require('../../assets/images/cafecom.svg');
+const logoModule = require('../../assets/images/cafecom.svg');
+let logoAssetPromise: Promise<Asset> | null = null;
+
+function loadLogoAsset() {
+  if (!logoAssetPromise) {
+    logoAssetPromise = Asset.loadAsync(logoModule).then(([asset]) => asset);
+  }
+
+  return logoAssetPromise;
+}
 
 type BrandLogoProps = {
   height?: number;
@@ -12,13 +22,39 @@ type BrandLogoProps = {
 };
 
 export function BrandLogo({ height = 144, width = 134 }: BrandLogoProps) {
+  const [logoUri, setLogoUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    loadLogoAsset()
+      .then((asset) => {
+        if (!mounted) return;
+        setLogoUri(asset.localUri ?? asset.uri);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        const asset = Asset.fromModule(logoModule);
+        setLogoUri(asset.localUri ?? asset.uri);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (!logoUri) {
+    return <View style={{ height, width }} />;
+  }
+
   return (
     <Image
       accessibilityLabel="CaféCom"
+      cachePolicy="none"
       contentFit="contain"
-      source={logoSource}
+      recyclingKey={logoUri}
+      source={{ uri: logoUri }}
       style={{ height, width }}
-      transition={120}
     />
   );
 }
