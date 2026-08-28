@@ -62,7 +62,7 @@ export default function LoginScreen() {
               <Text style={styles.label}>Correo electrónico</Text>
               <View style={[styles.inputContainer, errors.email && styles.inputError]}>
                 <SymbolView name={{ ios: 'envelope', android: 'mail' }} size={20} tintColor={colors.coffee} />
-                <TextInput accessibilityLabel="Correo electrónico" autoCapitalize="none" autoComplete="email" inputMode="email" onChangeText={setEmail} placeholder="nombre@correo.com" placeholderTextColor={colors.muted} returnKeyType="next" style={styles.input} value={email} />
+                <TextInput accessibilityLabel="Correo electrónico" autoCapitalize="none" autoComplete="email" cursorColor={colors.coffee} inputMode="email" onChangeText={setEmail} placeholder="nombre@correo.com" placeholderTextColor={colors.muted} returnKeyType="next" selectionColor={colors.coffee} style={styles.input} value={email} />
               </View>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
@@ -70,7 +70,7 @@ export default function LoginScreen() {
               <Text style={styles.label}>Contraseña</Text>
               <View style={[styles.inputContainer, errors.password && styles.inputError]}>
                 <SymbolView name={{ ios: 'lock', android: 'lock' }} size={20} tintColor={colors.coffee} />
-                <TextInput accessibilityLabel="Contraseña" autoComplete="current-password" onChangeText={setPassword} onSubmitEditing={handleLogin} placeholder="Mínimo 6 caracteres" placeholderTextColor={colors.muted} returnKeyType="done" secureTextEntry style={styles.input} value={password} />
+                <TextInput accessibilityLabel="Contraseña" autoComplete="current-password" cursorColor={colors.coffee} onChangeText={setPassword} onSubmitEditing={handleLogin} placeholder="Mínimo 6 caracteres" placeholderTextColor={colors.muted} returnKeyType="done" secureTextEntry selectionColor={colors.coffee} style={styles.input} value={password} />
               </View>
               {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   description: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 13, lineHeight: 19, marginTop: spacing.sm, textAlign: 'center' },
   form: { gap: spacing.md, marginTop: spacing.xl }, fieldGroup: { gap: spacing.xs }, label: { color: colors.darkBrown, fontFamily: typography.family, fontSize: 14, fontWeight: typography.bold },
   inputContainer: { alignItems: 'center', borderColor: colors.border, borderRadius: radius.md, borderWidth: 1, flexDirection: 'row', minHeight: 52, paddingHorizontal: spacing.md },
-  inputError: { borderColor: colors.error }, input: { color: colors.darkBrown, flex: 1, fontFamily: typography.family, fontSize: 15, marginLeft: spacing.sm, paddingVertical: 12 }, errorText: { color: colors.error, fontFamily: typography.family, fontSize: 12 },
+  inputError: { borderColor: colors.error }, input: { color: colors.coffee, flex: 1, fontFamily: typography.family, fontSize: 15, fontWeight: typography.regular, marginLeft: spacing.sm, paddingVertical: 12 }, errorText: { color: colors.error, fontFamily: typography.family, fontSize: 12 },
   submitError: { color: colors.error, fontFamily: typography.family, fontSize: 13, lineHeight: 18, textAlign: 'center' },
   primaryButton: { alignItems: 'center', backgroundColor: colors.coffee, borderRadius: radius.md, justifyContent: 'center', minHeight: 52, marginTop: spacing.sm }, primaryButtonText: { color: colors.white, fontFamily: typography.family, fontSize: 17, fontWeight: typography.bold },
   secondaryButton: { alignItems: 'center', borderColor: colors.coffee, borderRadius: radius.md, borderWidth: 1, justifyContent: 'center', minHeight: 50 }, secondaryButtonText: { color: colors.coffee, fontFamily: typography.family, fontSize: 16, fontWeight: typography.semiBold },
