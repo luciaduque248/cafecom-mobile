@@ -44,7 +44,7 @@ jobs:
           cache: gradle
 
       - name: Install JavaScript dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Configure public application environment
         run: cp .env.example .env
