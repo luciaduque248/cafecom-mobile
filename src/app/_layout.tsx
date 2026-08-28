@@ -11,7 +11,7 @@ import { AuthProvider } from '@/features/auth/auth-context';
 
 void SplashScreen.preventAutoHideAsync();
 
-const INTRO_FAILSAFE_MS = 2600;
+const INTRO_FAILSAFE_MS = 1800;
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
